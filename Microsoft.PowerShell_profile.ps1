@@ -21,3 +21,25 @@ Set-PSReadLineOption -PredictionSource History
 
 #Set Color for Predictions
 Set-PSReadLineOption -Colors @{InlinePrediction = 'DarkGray' }
+
+# Start Zookeeper and Kafka
+function startKafka {
+    ckf
+
+    Start-Process -FilePath .\bin\windows\zookeeper-server-start.bat -ArgumentList .\config\zookeeper.properties -NoNewWindow -Wait
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "Zookeeper failed to start"
+        return
+    }
+
+    try {
+        Remove-Item -Recurse -Force .\kafkaconfigkafka-test-logs\
+    } catch {
+        # Ignore any errors from this command
+    }
+
+    Start-Process -FilePath .\bin\windows\kafka-server-start.bat -ArgumentList .\config\server.properties -NoNewWindow -Wait
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "Kafka failed to start"
+    }
+}
